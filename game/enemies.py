@@ -112,39 +112,39 @@ class Enemy:
 ENEMY_POOL = [
     # ── Tier 1 ───────────────────────────────────────────────────────────────
     Enemy(
-        name="Goblin Scout", hp=30, mp=0, strength=4, intelligence=1, agility=6,
+        name="Goblin Scout", hp=38, mp=0, strength=4, intelligence=1, agility=6,
         vitality=3, defense=2, xp_reward=25, gold_min=2, gold_max=8,
         description="A small, wiry creature with beady eyes and a rusty blade.",
         attacks=[
-            {"name": "Stab",      "damage": 6,  "type": "physical", "chance": 0.7},
-            {"name": "Sneak Jab", "damage": 10, "type": "physical", "chance": 0.3},
+            {"name": "Stab",      "damage": 7,  "type": "physical", "chance": 0.7},
+            {"name": "Sneak Jab", "damage": 12, "type": "physical", "chance": 0.3},
         ],
     ),
     Enemy(
-        name="Giant Rat", hp=22, mp=0, strength=3, intelligence=0, agility=5,
+        name="Giant Rat", hp=28, mp=0, strength=3, intelligence=0, agility=5,
         vitality=2, defense=1, xp_reward=15, gold_min=0, gold_max=3,
         description="An oversized rodent with matted fur and vicious teeth.",
         attacks=[
-            {"name": "Bite",    "damage": 5,  "type": "physical", "chance": 0.6, "effect": "poison"},
-            {"name": "Scratch", "damage": 4,  "type": "physical", "chance": 0.4},
+            {"name": "Bite",    "damage": 6,  "type": "physical", "chance": 0.6, "effect": "poison"},
+            {"name": "Scratch", "damage": 5,  "type": "physical", "chance": 0.4},
         ],
     ),
     Enemy(
-        name="Skeleton Archer", hp=35, mp=10, strength=3, intelligence=2, agility=5,
+        name="Skeleton Archer", hp=44, mp=10, strength=3, intelligence=2, agility=5,
         vitality=2, defense=3, xp_reward=30, gold_min=3, gold_max=10,
         description="A rattling undead soldier that still holds a tarnished bow.",
         attacks=[
-            {"name": "Arrow Shot", "damage": 8,  "type": "ranged",   "chance": 0.6},
-            {"name": "Bone Club",  "damage": 6,  "type": "physical", "chance": 0.4},
+            {"name": "Arrow Shot", "damage": 10, "type": "ranged",   "chance": 0.6},
+            {"name": "Bone Club",  "damage": 7,  "type": "physical", "chance": 0.4},
         ],
     ),
     Enemy(
-        name="Slime", hp=40, mp=0, strength=2, intelligence=0, agility=1,
+        name="Slime", hp=50, mp=0, strength=2, intelligence=0, agility=1,
         vitality=8, defense=4, xp_reward=20, gold_min=0, gold_max=5,
         description="A quivering blob of acidic goo.",
         attacks=[
-            {"name": "Acid Splash", "damage": 7,  "type": "magic",    "chance": 0.5, "effect": "poison"},
-            {"name": "Slam",        "damage": 5,  "type": "physical", "chance": 0.5},
+            {"name": "Acid Splash", "damage": 8,  "type": "magic",    "chance": 0.5, "effect": "poison"},
+            {"name": "Slam",        "damage": 6,  "type": "physical", "chance": 0.5},
         ],
         status_immune=["poisoned"],
     ),

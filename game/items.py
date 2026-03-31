@@ -112,6 +112,40 @@ WEAPONS = [
     Weapon("Poison Dagger",     damage=9,  damage_type="physical", rarity="Uncommon", value=55, stat_bonus={"luck": 2}),
 ]
 
+# ── Starting weapons (character creation only, not in loot pool) ─────────────
+STARTING_WEAPONS = [
+    Weapon(
+        "Worn Shortsword", damage=7, damage_type="physical", rarity="Common", value=0,
+        stat_bonus={"strength": 1},
+        description="A nicked but balanced blade. Reliable in close quarters. +1 Strength.",
+    ),
+    Weapon(
+        "Heavy Club", damage=10, damage_type="physical", rarity="Common", value=0,
+        stat_bonus={},
+        description="A dense hunk of ironwood. Hits hard but offers nothing else.",
+    ),
+    Weapon(
+        "Cracked Staff", damage=6, damage_type="magic", rarity="Common", value=0,
+        stat_bonus={"intelligence": 1},
+        description="A staff etched with faded runes. Still channels arcane energy. +1 Intelligence.",
+    ),
+    Weapon(
+        "Apprentice Wand", damage=5, damage_type="magic", rarity="Common", value=0,
+        stat_bonus={"perception": 1},
+        description="A slender wand tuned for precision casting. +1 Perception.",
+    ),
+    Weapon(
+        "Hunting Bow", damage=6, damage_type="ranged", rarity="Common", value=0,
+        stat_bonus={"agility": 1},
+        description="A simple recurve bow carved from ash wood. +1 Agility.",
+    ),
+    Weapon(
+        "Scout's Dagger", damage=5, damage_type="physical", rarity="Common", value=0,
+        stat_bonus={"agility": 1, "luck": 1},
+        description="A thin blade favored by thieves and scouts. +1 Agility, +1 Luck.",
+    ),
+]
+
 ARMORS = [
     Armor("Leather Cap",       slot="head",    defense=3,  rarity="Common",   value=8),
     Armor("Iron Helm",         slot="head",    defense=7,  rarity="Common",   value=25),

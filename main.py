@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from game.ui       import clear, header, slow_print, menu, prompt, pause, color, divider
 from game.character import Character
 from game.stats     import CLASS_BASES
+from game.items     import STARTING_WEAPONS
 from game.world     import explore
 from game.menus     import (character_screen, inventory_screen,
                             allocate_stats, skills_screen, rest_at_camp)
@@ -42,6 +43,7 @@ def title_screen():
 
 def choose_class():
     classes = ["Warrior", "Mage", "Ranger"]
+    clear()
     header("Choose Your Class")
     for cls in classes:
         cfg = CLASS_BASES[cls]
@@ -55,6 +57,23 @@ def choose_class():
     divider()
     idx = menu([f"{CLASS_BASES[c]['symbol']} {c}" for c in classes], title="Your class")
     return classes[idx]
+
+
+def choose_weapon():
+    clear()
+    header("Choose Your Starting Weapon")
+    slow_print("  Every adventurer needs a weapon. Choose wisely.\n")
+
+    for wpn in STARTING_WEAPONS:
+        bonuses = ", ".join(f"{k.capitalize()}+{v}" for k, v in wpn.stat_bonus.items())
+        bonus_str = f"  [{bonuses}]" if bonuses else ""
+        print(f"  {color(wpn.name, 'bold')}  —  {wpn.damage} dmg ({wpn.damage_type}){bonus_str}")
+        print(f"    {color(wpn.description, 'dim')}")
+        print()
+
+    divider()
+    idx = menu([wpn.name for wpn in STARTING_WEAPONS], title="Your weapon")
+    return STARTING_WEAPONS[idx]
 
 
 def new_game():
@@ -72,7 +91,12 @@ def new_game():
         if not name:
             slow_print("  You must enter a name.")
 
+    starting_weapon = choose_weapon()
+
     player = Character(name, cls_name)
+    player.equipment["weapon"] = starting_weapon
+    player._recalc_max()
+
     clear()
     header("Your Adventure Begins")
     slow_print(f"\n  {CLASS_BASES[cls_name]['symbol']}  {name}, the {cls_name}, steps into the Rift Borderlands.")
