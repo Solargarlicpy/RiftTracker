@@ -202,13 +202,13 @@ SKILL_BOOKS = [
     SkillBook("Manual of Steady Shot",  "Steady Shot",    value=80,  description="Learn Steady Shot: precise ranged attack."),
     SkillBook("Tome of Whirlwind",      "Whirlwind",      value=120, rarity="Rare", description="Learn Whirlwind: strike all enemies."),
     SkillBook("Scroll of Ice Shard",    "Ice Shard",      value=80,  description="Learn Ice Shard: slows enemy."),
-    SkillBook("Tome of Shield Bash",    "Shield Bash",    value=80,  description="Learn Shield Bash: stuns enemy briefly."),
+    SkillBook("Tome of Bulwark Strike",  "Bulwark Strike",  value=80,  description="Learn Bulwark Strike: stuns enemy briefly."),
     SkillBook("Scroll of Arcane Blast", "Arcane Blast",   value=100, rarity="Uncommon", description="Learn Arcane Blast: pure magic damage."),
     SkillBook("Manual of Evasion",      "Evasion",        value=90,  rarity="Uncommon", description="Learn Evasion: greatly boosts dodge for one turn."),
     SkillBook("Tome of Battle Cry",     "Battle Cry",     value=90,  rarity="Uncommon", description="Learn Battle Cry: boost STR for 3 turns."),
     SkillBook("Scroll of Poison Arrow", "Poison Arrow",   value=75,  description="Learn Poison Arrow: poisons enemy."),
-    SkillBook("Manual of Shadow Step",  "Shadow Step",    value=110, rarity="Rare", description="Learn Shadow Step: skip enemy's next attack."),
-    SkillBook("Tome of Thunder Clap",   "Thunder Clap",   value=130, rarity="Rare", description="Learn Thunder Clap: AOE stun."),
+    SkillBook("Manual of Shade Step",  "Shade Step",  value=110, rarity="Rare", description="Learn Shade Step: skip enemy's next attack."),
+    SkillBook("Tome of Shock Slam",   "Shock Slam",  value=130, rarity="Rare", description="Learn Shock Slam: AOE stun."),
     SkillBook("Scroll of Mana Drain",   "Mana Drain",     value=100, rarity="Uncommon", description="Learn Mana Drain: steal enemy HP as MP."),
     SkillBook("Ancient Codex",          "Rift Pulse",     value=300, rarity="Legendary", description="Learn Rift Pulse: devastating arcane explosion."),
 ]
@@ -222,20 +222,33 @@ def random_rarity():
 
 def random_item(level=1, luck_bonus=0.0):
     pool = WEAPONS + ARMORS + CONSUMABLES + SKILL_BOOKS
-    weights = []
-    for item in pool:
-        ri = RARITIES.index(item.rarity)
-        w = RARITY_WEIGHT[ri] + luck_bonus * 100
-        weights.append(max(0.1, w))
+
+    # Higher rarities unlock progressively with level
+    rare_scale   = min(1.0, max(0.0, (level - 2) / 7))   # unlocks from lv3
+    epic_scale   = min(1.0, max(0.0, (level - 6) / 7))   # unlocks from lv7
+    legend_scale = min(1.0, max(0.0, (level - 12) / 5))  # unlocks from lv13
+
+    rarity_w = {
+        "Common":    max(10, 55 - level),
+        "Uncommon":  25,
+        "Rare":      12 * rare_scale + luck_bonus * 8,
+        "Epic":       6 * epic_scale + luck_bonus * 4,
+        "Legendary":  2 * legend_scale + luck_bonus * 2,
+    }
+
+    weights = [max(0.01, rarity_w[item.rarity]) for item in pool]
     return random.choices(pool, weights=weights, k=1)[0]
 
 
 def loot_table(level=1, luck_bonus=0.0, count=None):
     if count is None:
-        base = 1
-        if random.random() < 0.3 + luck_bonus:
-            base += 1
-        if random.random() < 0.1 + luck_bonus:
-            base += 1
-        count = base
+        # First item isn't guaranteed — chance grows with level
+        drop_chance  = min(0.75, 0.35 + level * 0.04)
+        extra_chance = min(0.30, luck_bonus * 0.5 + level * 0.015)
+
+        count = 0
+        if random.random() < drop_chance:
+            count = 1
+            if random.random() < extra_chance:
+                count = 2
     return [random_item(level, luck_bonus) for _ in range(count)]

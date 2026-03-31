@@ -22,7 +22,7 @@ SKILLS = {
         "description": "Spin strike. Deals 2x damage and ignores some defense.",
         "category": "offense",
     },
-    "Shield Bash": {
+    "Bulwark Strike": {
 
         "mp_cost": 8,
         "cooldown": 2,
@@ -92,14 +92,14 @@ SKILLS = {
         "description": "Enter evasive stance. Dodge chance +40% for 1 turn.",
         "category": "buff",
     },
-    "Shadow Step": {
+    "Shade Step": {
 
         "mp_cost": 18,
         "cooldown": 4,
         "description": "Phase out briefly. Enemy's next attack misses.",
         "category": "utility",
     },
-    "Thunder Clap": {
+    "Shock Slam": {
 
         "mp_cost": 30,
         "cooldown": 5,
@@ -147,11 +147,11 @@ def execute_skill(skill_name, attacker, defender):
         dmg = int(raw)   # ignores defense entirely
         msg = f"{attacker.name} spins in a Whirlwind for {dmg} damage! (ignores armor)"
 
-    elif skill_name == "Shield Bash":
+    elif skill_name == "Bulwark Strike":
         raw = strength * 1.5
         dmg = _apply_defense(raw, defender, "physical")
         effects["stun"] = 1
-        msg = f"{attacker.name} Shield Bashes for {dmg} damage! Enemy is stunned!"
+        msg = f"{attacker.name} Bulwark Strikees for {dmg} damage! Enemy is stunned!"
 
     elif skill_name == "Battle Cry":
         effects["buff_str"] = 3  # 3 turns
@@ -204,15 +204,15 @@ def execute_skill(skill_name, attacker, defender):
         effects["evasion"] = 1  # +40% dodge for 1 turn
         msg = f"{attacker.name} enters Evasion stance! Dodge chance greatly increased!"
 
-    elif skill_name == "Shadow Step":
+    elif skill_name == "Shade Step":
         effects["shadow_step"] = 1  # negate next enemy attack
-        msg = f"{attacker.name} uses Shadow Step! Next enemy attack will miss!"
+        msg = f"{attacker.name} uses Shade Step! Next enemy attack will miss!"
 
-    elif skill_name == "Thunder Clap":
+    elif skill_name == "Shock Slam":
         raw = (strength + agility) * 2 + wdmg * 2
         dmg = _apply_defense(raw, defender, "physical")
         effects["stun"] = 1
-        msg = f"{attacker.name} smashes a Thunder Clap for {dmg} damage! Enemy stunned!"
+        msg = f"{attacker.name} smashes a Shock Slam for {dmg} damage! Enemy stunned!"
 
     return dmg, mp_cost, msg, effects
 

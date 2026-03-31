@@ -168,7 +168,7 @@ def _loot_event(player):
     ]
     slow_print(f"\n  {random.choice(descriptions)}")
     drops = loot_table(player.level, player.get_loot_bonus())
-    gold = random.randint(5, 40 + player.level * 5)
+    gold = random.randint(max(2, player.level * 2), max(15, player.level * 8 + 5))
     player.gold += gold
     slow_print(f"  Found {gold} gold!")
     for item in drops:
