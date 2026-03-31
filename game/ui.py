@@ -1,6 +1,14 @@
 import os
 import time
 
+try:
+    import msvcrt
+    _MSVCRT_AVAILABLE = True
+except ImportError:
+    _MSVCRT_AVAILABLE = False
+
+_FAST_MODE = False
+
 WIDTH = 60
 
 def clear():
@@ -29,9 +37,23 @@ def header(title):
     print(f"{'═' * WIDTH}")
 
 def slow_print(text, delay=0.025):
+    global _FAST_MODE
+    if _FAST_MODE or not _MSVCRT_AVAILABLE or delay == 0:
+        print(text)
+        return
+
+    skipped = False
     for ch in text:
+        if not skipped and msvcrt.kbhit():
+            key = msvcrt.getwch()           # consume key so it doesn't leak into next input()
+            if key in ('\x00', '\xe0'):     # two-byte key (arrows, F-keys): consume second byte
+                msvcrt.getwch()
+            skipped = True                  # print rest of string instantly
+
         print(ch, end='', flush=True)
-        time.sleep(delay)
+        if not skipped:
+            time.sleep(delay)
+
     print()
 
 def prompt(msg=">> "):
@@ -53,7 +75,12 @@ def confirm(msg):
     return prompt().lower().startswith('y')
 
 def pause():
-    input("\n  [Press Enter to continue]")
+    global _FAST_MODE
+    hint = "[F] fast" if not _FAST_MODE else "[F] slow"
+    response = input(f"\n  [Press Enter to continue | {hint}] ").strip().lower()
+    if response == 'f':
+        _FAST_MODE = not _FAST_MODE
+        print(f"  Fast mode {'ON' if _FAST_MODE else 'OFF'}.")
 
 def color(text, code):
     codes = {
