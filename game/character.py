@@ -41,6 +41,8 @@ class Character:
 
         # Skills & status
         self.skills  = []       # learned skill names
+        self.killed_bosses = set()
+        self.visited_zones = set()
         self.skill_cooldowns = {}  # name -> remaining turns
         self.status_effects  = []  # "poisoned", "stunned", "slowed", ...
         self.temp_buffs      = {}  # name -> {stat, amount, turns_left}

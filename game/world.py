@@ -4,8 +4,8 @@ World exploration: zones, events, loot, merchants, shrines.
 import random
 from .ui import clear, header, slow_print, menu, pause, color, divider
 from .combat import run_combat
-from .enemies import get_enemy_for_level, get_boss
-from .items import loot_table, CONSUMABLES, WEAPONS, ARMORS, SKILL_BOOKS
+from .enemies import get_enemy_for_level, get_available_boss
+from .items import loot_table, boss_loot_table, CONSUMABLES, WEAPONS, ARMORS, SKILL_BOOKS
 
 
 ZONES = [
@@ -40,10 +40,40 @@ ZONES = [
         "danger":      0.60,
     },
     {
+        "name":        "Ashwood Wastes",
+        "min_level":   9,
+        "description": "A scorched expanse of dead trees and smouldering earth. Ashren's passage left nothing alive here.",
+        "danger":      0.62,
+    },
+    {
+        "name":        "Venom Hollows",
+        "min_level":   10,
+        "description": "A labyrinth of tunnels coated in dried webbing and old venom. The air is thick and wrong.",
+        "danger":      0.65,
+    },
+    {
+        "name":        "Ironvault Depths",
+        "min_level":   11,
+        "description": "The lowest chambers beneath the Iron Bulwark's domain. Rusted machinery still grinds in the dark.",
+        "danger":      0.68,
+    },
+    {
         "name":        "Rift Borderlands",
         "min_level":   12,
         "description": "Reality shimmers and tears here. Creatures from another dimension roam freely.",
-        "danger":      0.70,
+        "danger":      0.75,
+    },
+    {
+        "name":        "The Shattered Expanse",
+        "min_level":   13,
+        "description": "Floating islands of rock drift over an abyss with no bottom. The laws of the world do not apply here.",
+        "danger":      0.78,
+    },
+    {
+        "name":        "The Sovereign's Sanctum",
+        "min_level":   15,
+        "description": "The heart of the rift itself. Every surface hums with void energy. Nothing survives here for long.",
+        "danger":      0.85,
     },
 ]
 
@@ -68,6 +98,7 @@ def explore(player):
         return
 
     zone = available[idx]
+    player.visited_zones.add(zone["name"])
     clear()
     header(f"Exploring: {zone['name']}")
     slow_print(f"\n  {zone['description']}\n")
@@ -115,10 +146,14 @@ def _run_event(player, zone, event):
 # ── Events ───────────────────────────────────────────────────────────────────
 
 def _combat_event(player, zone):
-    # Chance for boss encounter at high level
-    if player.level >= 15 and random.random() < 0.05:
-        enemy = get_boss()
-        slow_print(color("\n  A terrible presence fills the air — THE RIFT SOVEREIGN approaches!", "red"))
+    # Boss encounter check (10% when any boss is eligible)
+    boss_data = None
+    if random.random() < 0.10:
+        boss_data = get_available_boss(player.level, player.killed_bosses)
+
+    if boss_data:
+        enemy = boss_data["enemy"].scale_to_level(player.level)
+        slow_print(color(f"\n  {boss_data['announcement']}", "red"))
         pause()
     else:
         enemy = get_enemy_for_level(player.level)
@@ -136,7 +171,22 @@ def _combat_event(player, zone):
                 slow_print(color(f"\n  ★ LEVEL UP! Now level {player.level}! ★", "yellow"))
                 slow_print(f"  HP and MP fully restored.")
                 slow_print(f"  You have {player.stat_points} stat point(s) to spend.")
-        # Loot
+
+        if boss_data:
+            # Boss-specific artifact loot
+            first_kill = enemy.name not in player.killed_bosses
+            player.killed_bosses.add(enemy.name)
+            artifacts = boss_loot_table(enemy.name, first_kill)
+            if artifacts:
+                slow_print(color("\n  ★ BOSS LOOT ★", "yellow"))
+                for item in artifacts:
+                    ok, msg = player.pick_up(item)
+                    if ok:
+                        slow_print(f"  {color('ARTIFACT:', 'red')} {color(str(item), 'red')}")
+                    else:
+                        slow_print(f"  {msg} Left behind: {item.name}")
+
+        # Always roll normal loot after any combat win (boss or not)
         drops = loot_table(player.level, player.get_loot_bonus())
         for item in drops:
             ok, msg = player.pick_up(item)

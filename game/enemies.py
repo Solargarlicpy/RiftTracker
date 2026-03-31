@@ -225,30 +225,9 @@ ENEMY_POOL = [
         status_immune=["poisoned", "slowed"],
     ),
 
-    # ── Boss ─────────────────────────────────────────────────────────────────
-    Enemy(
-        name="The Rift Sovereign", hp=400, mp=200, strength=20, intelligence=20, agility=16,
-        vitality=20, defense=18, xp_reward=650, gold_min=100, gold_max=200,
-        description="The ancient ruler of the rift dimension. Its mere presence warps reality.",
-        attacks=[
-            {"name": "Void Slash",    "damage": 35, "type": "physical", "chance": 0.25},
-            {"name": "Rift Blast",    "damage": 45, "type": "magic",    "chance": 0.25, "mp_cost": 20},
-            {"name": "Reality Tear",  "damage": 55, "type": "magic",    "chance": 0.20, "mp_cost": 30},
-            {"name": "Temporal Crush","damage": 40, "type": "physical", "chance": 0.15},
-            {"name": "Annihilate",    "damage": 70, "type": "magic",    "chance": 0.15, "mp_cost": 40},
-        ],
-        status_immune=["poisoned", "stunned", "slowed"],
-    ),
 ]
 
 ENEMY_BY_NAME = {e.name: e for e in ENEMY_POOL}
-
-TIER_RANGES = {
-    1: [0, 3],    # indices into ENEMY_POOL — tiers 1–4
-    2: [4, 7],
-    3: [8, 10],
-    4: [11, 11],  # boss
-}
 
 
 def get_enemy_for_level(player_level):
@@ -259,10 +238,85 @@ def get_enemy_for_level(player_level):
     elif player_level <= 14:
         pool = ENEMY_POOL[4:11]
     else:
-        pool = ENEMY_POOL[7:12]
+        pool = ENEMY_POOL[7:11]
     template = random.choice(pool)
     return template.scale_to_level(player_level)
 
 
-def get_boss():
-    return ENEMY_POOL[-1].scale_to_level(15)
+# ── Boss Pool ─────────────────────────────────────────────────────────────────
+
+BOSS_POOL = [
+    {
+        "min_level": 5,
+        "announcement": "The vault floor shudders. From the dark steps the IRON BULWARK.",
+        "enemy": Enemy(
+            name="Iron Bulwark", hp=220, mp=20, strength=14, intelligence=2, agility=3,
+            vitality=18, defense=20, xp_reward=200, gold_min=40, gold_max=80,
+            description="A colossal animated suit of armour, ancient guardian of a forgotten vault. Its joints grind with each thunderous step.",
+            attacks=[
+                {"name": "Iron Fist",     "damage": 22, "type": "physical", "chance": 0.45},
+                {"name": "Crushing Blow", "damage": 34, "type": "physical", "chance": 0.30},
+                {"name": "Slam Down",     "damage": 18, "type": "physical", "chance": 0.25, "effect": "stun"},
+            ],
+            status_immune=["stunned", "poisoned"],
+        ),
+    },
+    {
+        "min_level": 8,
+        "announcement": "The ceiling cracks. Eight legs lower a creature the size of a cart — THE VENOM MATRIARCH.",
+        "enemy": Enemy(
+            name="The Venom Matriarch", hp=300, mp=60, strength=10, intelligence=8, agility=14,
+            vitality=10, defense=10, xp_reward=280, gold_min=55, gold_max=105,
+            description="An ancient spider of monstrous size. Her venom can dissolve stone. Ten thousand young await her signal.",
+            attacks=[
+                {"name": "Fang Strike",  "damage": 18, "type": "physical", "chance": 0.40, "effect": "poison"},
+                {"name": "Web Snare",    "damage": 10, "type": "physical", "chance": 0.30, "effect": "slow"},
+                {"name": "Venom Spray",  "damage": 24, "type": "magic",    "chance": 0.30, "mp_cost": 15, "effect": "poison"},
+            ],
+            status_immune=["poisoned"],
+        ),
+    },
+    {
+        "min_level": 11,
+        "announcement": "The air reeks of ash and old rage. ASHREN THE UNBURNT rises from the embers.",
+        "enemy": Enemy(
+            name="Ashren the Unburnt", hp=370, mp=100, strength=16, intelligence=14, agility=8,
+            vitality=15, defense=14, xp_reward=360, gold_min=70, gold_max=130,
+            description="A fire knight who died mid-charge and never stopped burning. His hatred outlasted his flesh.",
+            attacks=[
+                {"name": "Flame Slash",    "damage": 28, "type": "physical", "chance": 0.35},
+                {"name": "Ash Cloud",      "damage": 24, "type": "magic",    "chance": 0.35, "mp_cost": 12, "effect": "stun"},
+                {"name": "Inferno Charge", "damage": 40, "type": "physical", "chance": 0.30, "mp_cost": 20},
+            ],
+            status_immune=["poisoned", "slowed"],
+        ),
+    },
+    {
+        "min_level": 15,
+        "announcement": "Reality tears open. From the wound steps THE RIFT SOVEREIGN — ruler of the void between worlds.",
+        "enemy": Enemy(
+            name="The Rift Sovereign", hp=450, mp=200, strength=20, intelligence=20, agility=16,
+            vitality=20, defense=18, xp_reward=650, gold_min=100, gold_max=200,
+            description="The ancient ruler of the rift dimension. Its mere presence warps reality.",
+            attacks=[
+                {"name": "Void Slash",    "damage": 35, "type": "physical", "chance": 0.25},
+                {"name": "Rift Blast",    "damage": 45, "type": "magic",    "chance": 0.25, "mp_cost": 20},
+                {"name": "Reality Tear",  "damage": 55, "type": "magic",    "chance": 0.20, "mp_cost": 30},
+                {"name": "Temporal Crush","damage": 40, "type": "physical", "chance": 0.15},
+                {"name": "Annihilate",    "damage": 70, "type": "magic",    "chance": 0.15, "mp_cost": 40},
+            ],
+            status_immune=["poisoned", "stunned", "slowed"],
+        ),
+    },
+]
+
+
+def get_available_boss(player_level, killed_bosses):
+    """Return a random eligible boss, or None. Prioritises unkilled bosses."""
+    unkilled = [b for b in BOSS_POOL
+                if player_level >= b["min_level"] and b["enemy"].name not in killed_bosses]
+    if unkilled:
+        return random.choice(unkilled)
+    # All eligible bosses already killed — allow re-fights at reduced chance
+    killed_eligible = [b for b in BOSS_POOL if player_level >= b["min_level"]]
+    return random.choice(killed_eligible) if killed_eligible else None

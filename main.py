@@ -20,6 +20,7 @@ from game.items     import STARTING_WEAPONS
 from game.world     import explore
 from game.menus     import (character_screen, inventory_screen,
                             allocate_stats, skills_screen, rest_at_camp)
+from game.worldmap  import show_world_map
 
 
 TITLE = r"""
@@ -128,6 +129,7 @@ def camp_menu(player):
 
         options = [
             "Explore",
+            "World Map",
             "Character Sheet",
             "Inventory",
             "Allocate Stats",
@@ -143,21 +145,24 @@ def camp_menu(player):
                 return False   # signal game over
 
         elif choice == 1:
-            character_screen(player)
+            show_world_map(player)
 
         elif choice == 2:
-            inventory_screen(player)
+            character_screen(player)
 
         elif choice == 3:
-            allocate_stats(player)
+            inventory_screen(player)
 
         elif choice == 4:
-            skills_screen(player)
+            allocate_stats(player)
 
         elif choice == 5:
-            rest_at_camp(player)
+            skills_screen(player)
 
         elif choice == 6:
+            rest_at_camp(player)
+
+        elif choice == 7:
             if _confirm_quit():
                 return True   # quit
 

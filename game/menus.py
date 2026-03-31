@@ -65,7 +65,8 @@ def inventory_screen(player):
         opts = []
         for item in player.inventory:
             rarity_color_map = {
-                "Common":"dim","Uncommon":"green","Rare":"blue","Epic":"magenta","Legendary":"yellow"
+                "Common":"dim","Uncommon":"green","Rare":"blue","Epic":"magenta",
+                "Legendary":"yellow","Artifact":"red"
             }
             rc = rarity_color_map.get(item.rarity, "reset")
             tag = ""

@@ -3,10 +3,10 @@ Item definitions: weapons, armor, consumables, books, misc loot.
 """
 import random
 
-RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary"]
+RARITIES = ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Artifact"]
 RARITY_COLOR = {"Common": "dim", "Uncommon": "green", "Rare": "blue",
-                "Epic": "magenta", "Legendary": "yellow"}
-RARITY_WEIGHT = [55, 25, 12, 6, 2]
+                "Epic": "magenta", "Legendary": "yellow", "Artifact": "red"}
+RARITY_WEIGHT = [55, 25, 12, 6, 2, 0]
 
 SLOTS = ["head", "chest", "legs", "feet", "hands", "weapon", "offhand", "ring", "amulet"]
 
@@ -252,3 +252,84 @@ def loot_table(level=1, luck_bonus=0.0, count=None):
             if random.random() < extra_chance:
                 count = 2
     return [random_item(level, luck_bonus) for _ in range(count)]
+
+
+# ── Artifact armor — boss-exclusive, never in normal loot pool ───────────────
+
+ARTIFACT_ARMORS = [
+    # Iron Bulwark drops
+    Armor("Ironhide Carapace",    slot="chest",  defense=28, rarity="Artifact", value=900,
+          stat_bonus={"strength": 4, "vitality": 5},
+          description="Forged from the shell of a defeated iron guardian. Impervious to lesser blows."),
+    Armor("Bulwark's Grips",      slot="hands",  defense=18, rarity="Artifact", value=700,
+          stat_bonus={"strength": 5},
+          description="Gauntlets torn from the Bulwark's own arms. The iron still remembers its purpose."),
+    Armor("Ironhide Sabatons",    slot="feet",   defense=16, rarity="Artifact", value=650,
+          stat_bonus={"vitality": 4, "strength": 2},
+          description="The Bulwark's boots. Each step shakes the ground."),
+
+    # Venom Matriarch drops
+    Armor("Venomweave Mantle",    slot="chest",  defense=20, rarity="Artifact", value=900,
+          stat_bonus={"agility": 5, "luck": 4},
+          description="Woven from silkspider venom sacs. Grants an eerie resistance to poison."),
+    Armor("Spider's Veil",        slot="head",   defense=12, rarity="Artifact", value=680,
+          stat_bonus={"agility": 5, "luck": 4},
+          description="A gossamer hood spun by the Matriarch herself. Light as air, strong as chain."),
+    Armor("Venomstalker Leggings",slot="legs",   defense=18, rarity="Artifact", value=660,
+          stat_bonus={"agility": 4, "luck": 3},
+          description="Chitin-reinforced leggings harvested from the Matriarch's carapace."),
+
+    # Ashren the Unburnt drops
+    Armor("Ashen Greaves",        slot="legs",   defense=22, rarity="Artifact", value=900,
+          stat_bonus={"strength": 4, "vitality": 3, "intelligence": 2},
+          description="Still warm from Ashren's eternal pyre. The ash absorbs magical damage."),
+    Armor("Ashen Ring",           slot="ring",   defense=0,  rarity="Artifact", value=720,
+          stat_bonus={"strength": 4, "intelligence": 3},
+          description="A ring of black iron fused in Ashren's dying flame. Hot to the touch."),
+
+    # Rift Sovereign drops
+    Armor("Crown of the Sovereign", slot="head", defense=24, rarity="Artifact", value=1100,
+          stat_bonus={"intelligence": 6, "perception": 6},
+          description="The crown of a god-slain ruler. Reality bends slightly around the wearer's thoughts."),
+    Armor("Sovereign's Pendant",  slot="amulet", defense=0,  rarity="Artifact", value=900,
+          stat_bonus={"strength": 3, "intelligence": 3, "agility": 3, "vitality": 3, "luck": 3, "perception": 3},
+          description="A fragment of the Sovereign's core. All stats flow through it equally."),
+]
+
+ARTIFACT_BY_NAME = {a.name: a for a in ARTIFACT_ARMORS}
+
+# ── Boss loot tables ─────────────────────────────────────────────────────────
+# "guaranteed" drops on first kill only. "bonus" have a per-item drop chance.
+
+BOSS_LOOT = {
+    "Iron Bulwark": {
+        "guaranteed": "Ironhide Carapace",
+        "bonus": [("Bulwark's Grips", 0.50), ("Ironhide Sabatons", 0.40)],
+    },
+    "The Venom Matriarch": {
+        "guaranteed": "Venomweave Mantle",
+        "bonus": [("Spider's Veil", 0.50), ("Venomstalker Leggings", 0.40)],
+    },
+    "Ashren the Unburnt": {
+        "guaranteed": "Ashen Greaves",
+        "bonus": [("Ashen Ring", 0.55)],
+    },
+    "The Rift Sovereign": {
+        "guaranteed": "Crown of the Sovereign",
+        "bonus": [("Sovereign's Pendant", 0.60)],
+    },
+}
+
+
+def boss_loot_table(boss_name, first_kill=True):
+    """Return artifact drops for a boss kill. Guaranteed piece only on first kill."""
+    bl = BOSS_LOOT.get(boss_name, {})
+    drops = []
+    if first_kill:
+        g = bl.get("guaranteed")
+        if g and g in ARTIFACT_BY_NAME:
+            drops.append(ARTIFACT_BY_NAME[g])
+    for item_name, chance in bl.get("bonus", []):
+        if random.random() < chance and item_name in ARTIFACT_BY_NAME:
+            drops.append(ARTIFACT_BY_NAME[item_name])
+    return drops
