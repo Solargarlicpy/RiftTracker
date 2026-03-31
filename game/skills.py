@@ -9,98 +9,98 @@ import random
 
 SKILLS = {
     "Power Strike": {
-        "classes": ["Warrior"],
+
         "mp_cost": 10,
         "cooldown": 0,
         "description": "A mighty blow dealing 2.5x weapon damage.",
         "category": "offense",
     },
     "Whirlwind": {
-        "classes": ["Warrior"],
+
         "mp_cost": 20,
         "cooldown": 3,
         "description": "Spin strike. Deals 2x damage and ignores some defense.",
         "category": "offense",
     },
     "Shield Bash": {
-        "classes": ["Warrior"],
+
         "mp_cost": 8,
         "cooldown": 2,
         "description": "Bash with your shield. Stuns enemy for 1 turn.",
         "category": "control",
     },
     "Battle Cry": {
-        "classes": ["Warrior"],
+
         "mp_cost": 15,
         "cooldown": 4,
         "description": "Boost STR by 5 for 3 turns.",
         "category": "buff",
     },
     "Fireball": {
-        "classes": ["Mage"],
+
         "mp_cost": 18,
         "cooldown": 0,
         "description": "Hurl a fireball. INT-scaled magic damage.",
         "category": "offense",
     },
     "Ice Shard": {
-        "classes": ["Mage"],
+
         "mp_cost": 12,
         "cooldown": 0,
         "description": "Ice projectile that slows the enemy (−3 AGI for 2 turns).",
         "category": "debuff",
     },
     "Arcane Blast": {
-        "classes": ["Mage"],
+
         "mp_cost": 25,
         "cooldown": 2,
         "description": "Pure arcane energy. Ignores all armor.",
         "category": "offense",
     },
     "Mana Drain": {
-        "classes": ["Mage"],
+
         "mp_cost": 15,
         "cooldown": 3,
         "description": "Siphon enemy life force, converting it to your MP.",
         "category": "utility",
     },
     "Rift Pulse": {
-        "classes": ["Mage"],
+
         "mp_cost": 50,
         "cooldown": 5,
         "description": "Legendary arcane explosion. Massive INT-scaled damage.",
         "category": "offense",
     },
     "Steady Shot": {
-        "classes": ["Ranger"],
+
         "mp_cost": 8,
         "cooldown": 0,
         "description": "Aimed shot dealing 2x ranged damage with high crit chance.",
         "category": "offense",
     },
     "Poison Arrow": {
-        "classes": ["Ranger"],
+
         "mp_cost": 10,
         "cooldown": 0,
         "description": "Arrow coated in poison. Deals damage over 3 turns.",
         "category": "debuff",
     },
     "Evasion": {
-        "classes": ["Ranger"],
+
         "mp_cost": 12,
         "cooldown": 3,
         "description": "Enter evasive stance. Dodge chance +40% for 1 turn.",
         "category": "buff",
     },
     "Shadow Step": {
-        "classes": ["Ranger"],
+
         "mp_cost": 18,
         "cooldown": 4,
         "description": "Phase out briefly. Enemy's next attack misses.",
         "category": "utility",
     },
     "Thunder Clap": {
-        "classes": ["Warrior", "Ranger"],
+
         "mp_cost": 30,
         "cooldown": 5,
         "description": "Thunderous strike. Stuns and deals heavy damage.",

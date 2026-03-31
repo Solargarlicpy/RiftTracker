@@ -261,8 +261,6 @@ class Character:
                 return False, f"You already know {item.skill_name}."
             from .skills import SKILLS
             sk = SKILLS.get(item.skill_name)
-            if sk and self.cls_name not in sk.get("classes", [self.cls_name]):
-                return False, f"Only {'/'.join(sk['classes'])} can learn this skill."
             self.skills.append(item.skill_name)
             self.inventory.pop(index)
             return True, f"Learned skill: {item.skill_name}!"
