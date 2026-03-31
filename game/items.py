@@ -154,10 +154,10 @@ ARMORS = [
 
 CONSUMABLES = [
     Consumable("Health Potion",       "heal_hp",   40,  value=15, description="Restores 40 HP."),
-    Consumable("Greater Health Pot",  "heal_hp",   80,  value=30, rarity="Uncommon", description="Restores 80 HP."),
+    Consumable("Greater Health Potion",  "heal_hp",   80,  value=30, rarity="Uncommon", description="Restores 80 HP."),
     Consumable("Elixir of Life",      "full_heal", 0,   value=80, rarity="Rare", description="Fully restores HP."),
     Consumable("Mana Potion",         "heal_mp",   40,  value=15, description="Restores 40 MP."),
-    Consumable("Greater Mana Pot",    "heal_mp",   80,  value=30, rarity="Uncommon", description="Restores 80 MP."),
+    Consumable("Greater Mana Potion",    "heal_mp",   80,  value=30, rarity="Uncommon", description="Restores 80 MP."),
     Consumable("Antidote",            "antidote",  0,   value=10, description="Cures poison."),
     Consumable("Phoenix Feather",     "revive",    0,   value=100, rarity="Rare", description="Revives with 50% HP."),
 ]

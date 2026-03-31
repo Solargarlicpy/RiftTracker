@@ -70,7 +70,7 @@ def loot_bonus(luck):
     return min(0.30, luck * 0.01)
 
 def xp_for_level(level):
-    return int(100 * (level ** 1.5))
+    return int(60 * (level ** 1.25))
 
 def stat_points_per_level():
     return 3

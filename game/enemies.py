@@ -92,7 +92,7 @@ class Enemy:
     def scale_to_level(self, player_level):
         """Return a level-scaled copy of this enemy."""
         e = copy.deepcopy(self)
-        factor = 1 + (player_level - 1) * 0.18
+        factor = 1 + (player_level - 1) * 0.12
         e.hp = e.max_hp = max(10, int(e.hp * factor))
         e.strength = int(e.strength * factor)
         e.intelligence = int(e.intelligence * factor)
@@ -113,7 +113,7 @@ ENEMY_POOL = [
     # ── Tier 1 ───────────────────────────────────────────────────────────────
     Enemy(
         name="Goblin Scout", hp=30, mp=0, strength=4, intelligence=1, agility=6,
-        vitality=3, defense=2, xp_reward=18, gold_min=2, gold_max=8,
+        vitality=3, defense=2, xp_reward=25, gold_min=2, gold_max=8,
         description="A small, wiry creature with beady eyes and a rusty blade.",
         attacks=[
             {"name": "Stab",      "damage": 6,  "type": "physical", "chance": 0.7},
@@ -122,7 +122,7 @@ ENEMY_POOL = [
     ),
     Enemy(
         name="Giant Rat", hp=22, mp=0, strength=3, intelligence=0, agility=5,
-        vitality=2, defense=1, xp_reward=10, gold_min=0, gold_max=3,
+        vitality=2, defense=1, xp_reward=15, gold_min=0, gold_max=3,
         description="An oversized rodent with matted fur and vicious teeth.",
         attacks=[
             {"name": "Bite",    "damage": 5,  "type": "physical", "chance": 0.6, "effect": "poison"},
@@ -131,7 +131,7 @@ ENEMY_POOL = [
     ),
     Enemy(
         name="Skeleton Archer", hp=35, mp=10, strength=3, intelligence=2, agility=5,
-        vitality=2, defense=3, xp_reward=22, gold_min=3, gold_max=10,
+        vitality=2, defense=3, xp_reward=30, gold_min=3, gold_max=10,
         description="A rattling undead soldier that still holds a tarnished bow.",
         attacks=[
             {"name": "Arrow Shot", "damage": 8,  "type": "ranged",   "chance": 0.6},
@@ -140,7 +140,7 @@ ENEMY_POOL = [
     ),
     Enemy(
         name="Slime", hp=40, mp=0, strength=2, intelligence=0, agility=1,
-        vitality=8, defense=4, xp_reward=14, gold_min=0, gold_max=5,
+        vitality=8, defense=4, xp_reward=20, gold_min=0, gold_max=5,
         description="A quivering blob of acidic goo.",
         attacks=[
             {"name": "Acid Splash", "damage": 7,  "type": "magic",    "chance": 0.5, "effect": "poison"},
@@ -152,7 +152,7 @@ ENEMY_POOL = [
     # ── Tier 2 ───────────────────────────────────────────────────────────────
     Enemy(
         name="Orc Warrior", hp=70, mp=0, strength=9, intelligence=2, agility=4,
-        vitality=8, defense=7, xp_reward=45, gold_min=8, gold_max=20,
+        vitality=8, defense=7, xp_reward=60, gold_min=8, gold_max=20,
         description="A muscular green-skinned brute with a chipped axe.",
         attacks=[
             {"name": "Axe Swing",   "damage": 14, "type": "physical", "chance": 0.5},
@@ -162,7 +162,7 @@ ENEMY_POOL = [
     ),
     Enemy(
         name="Dark Mage", hp=45, mp=60, strength=2, intelligence=9, agility=4,
-        vitality=4, defense=3, xp_reward=50, gold_min=10, gold_max=25,
+        vitality=4, defense=3, xp_reward=65, gold_min=10, gold_max=25,
         description="A robed figure wreathed in crackling dark energy.",
         attacks=[
             {"name": "Shadow Bolt", "damage": 16, "type": "magic",    "chance": 0.5, "mp_cost": 8},
@@ -172,7 +172,7 @@ ENEMY_POOL = [
     ),
     Enemy(
         name="Forest Bandit", hp=55, mp=0, strength=7, intelligence=3, agility=8,
-        vitality=5, defense=5, xp_reward=38, gold_min=12, gold_max=30,
+        vitality=5, defense=5, xp_reward=52, gold_min=12, gold_max=30,
         description="A nimble highwayman with twin daggers.",
         attacks=[
             {"name": "Dual Slash",  "damage": 12, "type": "physical", "chance": 0.5},
@@ -182,7 +182,7 @@ ENEMY_POOL = [
     ),
     Enemy(
         name="Stone Golem", hp=110, mp=0, strength=12, intelligence=0, agility=1,
-        vitality=14, defense=15, xp_reward=70, gold_min=5, gold_max=15,
+        vitality=14, defense=15, xp_reward=95, gold_min=5, gold_max=15,
         description="A slow but nearly indestructible animated statue.",
         attacks=[
             {"name": "Fist Smash",   "damage": 20, "type": "physical", "chance": 0.6},
@@ -194,7 +194,7 @@ ENEMY_POOL = [
     # ── Tier 3 ───────────────────────────────────────────────────────────────
     Enemy(
         name="Vampire Lord", hp=130, mp=80, strength=12, intelligence=10, agility=10,
-        vitality=10, defense=10, xp_reward=120, gold_min=30, gold_max=60,
+        vitality=10, defense=10, xp_reward=165, gold_min=30, gold_max=60,
         description="An ancient undead noble who feeds on the living.",
         attacks=[
             {"name": "Blood Drain",   "damage": 20, "type": "magic",    "chance": 0.4, "mp_cost": 10},
@@ -205,7 +205,7 @@ ENEMY_POOL = [
     ),
     Enemy(
         name="Wyvern", hp=160, mp=30, strength=15, intelligence=5, agility=12,
-        vitality=12, defense=12, xp_reward=140, gold_min=25, gold_max=55,
+        vitality=12, defense=12, xp_reward=190, gold_min=25, gold_max=55,
         description="A fearsome two-legged dragon with a barbed tail.",
         attacks=[
             {"name": "Claw Slash",  "damage": 22, "type": "physical", "chance": 0.4},
@@ -215,7 +215,7 @@ ENEMY_POOL = [
     ),
     Enemy(
         name="Rift Wraith", hp=100, mp=120, strength=5, intelligence=15, agility=14,
-        vitality=6, defense=5, xp_reward=130, gold_min=20, gold_max=50,
+        vitality=6, defense=5, xp_reward=175, gold_min=20, gold_max=50,
         description="A spectral horror born from a dimensional rift.",
         attacks=[
             {"name": "Soul Rend",   "damage": 25, "type": "magic",    "chance": 0.4, "mp_cost": 15},
@@ -228,7 +228,7 @@ ENEMY_POOL = [
     # ── Boss ─────────────────────────────────────────────────────────────────
     Enemy(
         name="The Rift Sovereign", hp=400, mp=200, strength=20, intelligence=20, agility=16,
-        vitality=20, defense=18, xp_reward=500, gold_min=100, gold_max=200,
+        vitality=20, defense=18, xp_reward=650, gold_min=100, gold_max=200,
         description="The ancient ruler of the rift dimension. Its mere presence warps reality.",
         attacks=[
             {"name": "Void Slash",    "damage": 35, "type": "physical", "chance": 0.25},
