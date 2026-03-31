@@ -1,0 +1,37 @@
+{
+  "name": "SOLARMAGE",
+  "cls_name": "Mage",
+  "level": 1,
+  "xp": 0,
+  "xp_next": 142,
+  "stat_points": 0,
+  "gold": 20,
+  "hp": 89,
+  "mp": 177,
+  "strength": 2,
+  "intelligence": 9,
+  "agility": 3,
+  "vitality": 3,
+  "luck": 4,
+  "perception": 5,
+  "skills": [],
+  "killed_bosses": [],
+  "visited_zones": [],
+  "status_effects": [],
+  "equipment": {
+    "head": null,
+    "chest": null,
+    "legs": null,
+    "feet": null,
+    "hands": null,
+    "weapon": {
+      "name": "Cracked Staff",
+      "itype": "weapon"
+    },
+    "offhand": null,
+    "ring": null,
+    "amulet": null
+  },
+  "inventory": [],
+  "saved_at": "2026-03-30 23:02"
+}

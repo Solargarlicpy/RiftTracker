@@ -21,6 +21,7 @@ from game.world     import explore
 from game.menus     import (character_screen, inventory_screen,
                             allocate_stats, skills_screen, rest_at_camp)
 from game.worldmap  import show_world_map
+from game.saveload  import save_game, load_game, list_saves
 
 
 TITLE = r"""
@@ -135,6 +136,7 @@ def camp_menu(player):
             "Allocate Stats",
             "Skills",
             "Rest (restore HP/MP)",
+            "Save Game",
             "Quit",
         ]
         choice = menu(options)
@@ -143,6 +145,8 @@ def camp_menu(player):
             explore(player)
             if not player.is_alive():
                 return False   # signal game over
+            # Auto-save after each exploration
+            save_game(player)
 
         elif choice == 1:
             show_world_map(player)
@@ -163,6 +167,14 @@ def camp_menu(player):
             rest_at_camp(player)
 
         elif choice == 7:
+            ok, path = save_game(player)
+            if ok:
+                slow_print(f"  Game saved.")
+            else:
+                slow_print(f"  Save failed: {path}")
+            pause()
+
+        elif choice == 8:
             if _confirm_quit():
                 return True   # quit
 
@@ -183,17 +195,63 @@ def game_over(player):
     pause()
 
 
+def load_game_menu():
+    """Show saved characters and let the player pick one. Returns player or None."""
+    saves = list_saves()
+    if not saves:
+        slow_print("  No saved games found.")
+        pause()
+        return None
+
+    clear()
+    header("Load Game")
+    opts = []
+    for s in saves:
+        opts.append(
+            f"{s['name']}  [{s['cls']}]  Lv.{s['level']}  {s['gold']}g  —  {s['saved_at']}"
+        )
+    opts.append("Back")
+
+    idx = menu(opts, title="Select a save")
+    if idx == len(saves):
+        return None
+
+    try:
+        player = load_game(saves[idx]["path"])
+        slow_print(f"\n  Welcome back, {player.name}!")
+        pause()
+        return player
+    except Exception as e:
+        slow_print(f"  Failed to load save: {e}")
+        pause()
+        return None
+
+
 def main():
     while True:
         title_screen()
-        opts = ["New Game", "Quit"]
+        saves_exist = bool(list_saves())
+        opts = ["New Game"]
+        if saves_exist:
+            opts.append("Load Game")
+        opts.append("Quit")
+
         choice = menu(opts)
-        if choice == 1:
+
+        # "Quit" is always the last option
+        if choice == len(opts) - 1:
             clear()
             print("\n  May the Rift spare you, traveller.\n")
             break
 
-        player = new_game()
+        if choice == 0:
+            player = new_game()
+        else:
+            # choice == 1 and saves_exist → Load Game
+            player = load_game_menu()
+            if player is None:
+                continue
+
         result = camp_menu(player)
 
         if not result:
