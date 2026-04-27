@@ -2,7 +2,7 @@
 World exploration: zones, events, loot, merchants, shrines.
 """
 import random
-from .ui import clear, header, slow_print, menu, pause, color, divider
+from .ui import clear, header, slow_print, menu, pause, color, divider, hp_bar
 from .combat import run_combat
 from .enemies import get_enemy_for_level, get_available_boss
 from .items import loot_table, boss_loot_table, CONSUMABLES, WEAPONS, ARMORS, SKILL_BOOKS
@@ -86,9 +86,100 @@ EVENT_WEIGHTS = {
     "rest":     7,
 }
 
+ZONE_ROOMS = {
+    "Mossy Ruins": [
+        "You step through a collapsed archway. Ferns push through the cracked flagstones.",
+        "A long hall stretches ahead, its ceiling open to the grey sky.",
+        "A flooded chamber — your boots splash through ankle-deep rainwater.",
+        "Carved stone faces line the walls, their expressions worn smooth by centuries.",
+        "You squeeze through a narrow gap where two walls have folded together.",
+        "A central courtyard, open and eerily still. Moss covers everything.",
+    ],
+    "Goblin Warrens": [
+        "A low tunnel reeks of rot and old cook-fires.",
+        "A wider chamber. Crude cots line the walls — recently abandoned.",
+        "The floor is sticky. You don't look down.",
+        "A rickety rope bridge spans a pit of unknown depth.",
+        "Scratched tally marks cover every surface. Someone was counting something.",
+        "A collapsed section forces you to crawl. Your armour scrapes the rock.",
+    ],
+    "Haunted Forest": [
+        "Fog hangs between the trees at chest height. Shapes drift through it.",
+        "A ring of dead birds lies arranged in a perfect circle on the ground.",
+        "The trees here grow in wrong directions — twisted back on themselves.",
+        "A child's shoe sits in the middle of the path. Just one.",
+        "The canopy closes overhead. No light filters through.",
+        "Distant laughter echoes, then cuts off abruptly.",
+    ],
+    "Bandit Stronghold": [
+        "A makeshift gate of sharpened logs bars the next passage. You slip through a gap.",
+        "Watch-fire embers still glow in a rusted brazier. The guards aren't far.",
+        "A storage room packed with stolen crates and barrels.",
+        "The main hall — long tables overturned, evidence of a recent brawl.",
+        "A narrow catwalk above a training yard. Below, figures spar in torchlight.",
+        "A heavy iron door stands ajar. The warden's quarters.",
+    ],
+    "Sunken Catacombs": [
+        "Black water rises to your knees. Something brushes past your leg.",
+        "Rows of stone sarcophagi, their lids cracked open from within.",
+        "A vaulted chamber where the ceiling drips constantly into the dark water below.",
+        "Carved epitaphs line the walls — names you don't recognise. Then one you do.",
+        "A narrow staircase spirals further down into the flooded dark.",
+        "An altar, still dry on a raised plinth. Offerings rot on its surface.",
+    ],
+    "Ashwood Wastes": [
+        "Charred trunks surround you like black pillars. Nothing grows here.",
+        "A crater where something enormous landed and burned.",
+        "The ash is ankle-deep. Every step leaves a perfect print behind you.",
+        "Smoke rises from fissures in the earth. The ground is warm underfoot.",
+        "The skeleton of a building — walls standing, everything inside incinerated.",
+        "A twisted iron sculpture. You realise it used to be a gate.",
+    ],
+    "Venom Hollows": [
+        "Thick webbing coats the walls. It trembles without wind.",
+        "Egg sacs the size of barrels hang from the ceiling.",
+        "The tunnel narrows. Something has been dragging prey along the floor — recently.",
+        "A chamber where the air shimmers with a faint toxic haze.",
+        "A dried husk in armour, suspended in webbing. Its weapons are still good.",
+        "The floor here is slick with old venom. You move carefully.",
+    ],
+    "Ironvault Depths": [
+        "Rusted gears the size of cart wheels grind slowly overhead.",
+        "A conveyor belt still moves, carrying nothing to nowhere.",
+        "The walls here are solid iron plate, riveted together by long-dead hands.",
+        "A control room full of levers, all seized with rust.",
+        "Steam vents periodically through cracks in the floor. Time your steps.",
+        "A vast chamber where the machinery is densest — and loudest.",
+    ],
+    "Rift Borderlands": [
+        "The air tears open and seals again as you watch.",
+        "Gravity shifts slightly — you adjust your footing and press on.",
+        "A stretch of ground that isn't quite there. You cross carefully.",
+        "Two versions of the same rock occupy the same space, flickering between each other.",
+        "A creature from elsewhere drifts past, ignoring you entirely.",
+        "The sky here is the wrong colour. You've stopped asking why.",
+    ],
+    "The Shattered Expanse": [
+        "A floating island of rock. You jump across a gap with nothing below.",
+        "Chains the size of houses connect two distant landmasses. You walk one.",
+        "A waterfall that falls upward, spraying mist across your path.",
+        "The remnant of a building drifts slowly past at eye level.",
+        "Gravity has a clear direction here — it just isn't down.",
+        "You reach a wide platform. The abyss surrounds you on all sides.",
+    ],
+    "The Sovereign's Sanctum": [
+        "The walls pulse with void light. Your vision swims.",
+        "Pillars of solidified rift energy line a grand corridor.",
+        "The floor is transparent. Infinite darkness churns beneath it.",
+        "Whispers form words in a language you almost understand.",
+        "An antechamber. Beyond the sealed door, something immense waits.",
+        "The air here hums at a frequency that vibrates your teeth.",
+    ],
+}
+
 
 def explore(player):
-    """Main exploration loop for one zone visit."""
+    """Main exploration loop — player-driven depth system."""
     available = [z for z in ZONES if player.level >= z["min_level"]]
     zone_names = [f"{z['name']} (Lv.{z['min_level']}+)" for z in available]
     zone_names.append("Return to camp")
@@ -99,36 +190,104 @@ def explore(player):
 
     zone = available[idx]
     player.visited_zones.add(zone["name"])
-    clear()
-    header(f"Exploring: {zone['name']}")
-    slow_print(f"\n  {zone['description']}\n")
 
-    steps = random.randint(3, 6)
-    for step in range(steps):
+    clear()
+    header(f"Entering: {zone['name']}")
+    slow_print(f"\n  {zone['description']}\n")
+    pause()
+
+    depth = 0
+    campfire_uses = 2
+    boss_fought = False
+    room_index = 0
+    just_rested = False
+
+    while player.is_alive():
+
+        if not just_rested:
+            # Room flavour
+            room_pool = ZONE_ROOMS.get(zone["name"], [])
+            if room_pool:
+                slow_print(f"\n  {room_pool[room_index % len(room_pool)]}")
+                room_index += 1
+            pause()
+
+            # Boss gate at depth 5+, otherwise normal event
+            if depth >= 5 and not boss_fought:
+                boss_data = get_available_boss(player.level, player.killed_bosses)
+                if boss_data:
+                    _combat_event(player, zone, force_boss=True)
+                    boss_fought = True
+                else:
+                    event = _roll_event(zone, depth)
+                    campfire_uses = _run_event(player, zone, event, depth, campfire_uses)
+            else:
+                event = _roll_event(zone, depth)
+                campfire_uses = _run_event(player, zone, event, depth, campfire_uses)
+
+        just_rested = False
+
         if not player.is_alive():
-            break
-        slow_print(f"\n  You press deeper... (step {step+1}/{steps})")
-        pause()
-        event = _roll_event(zone)
-        _run_event(player, zone, event)
-        if not player.is_alive():
+            slow_print(color("\n  You have been defeated...", "red"))
             return
+
+        _show_expedition_status(player, depth, campfire_uses, zone)
+
+        choices = ["Press Deeper"]
+        if campfire_uses > 0:
+            choices.append(f"Make Camp ({campfire_uses} use(s) left)")
+        else:
+            choices.append("Make Camp (no supplies left)")
+        choices.append("Return to Camp")
+
+        choice_idx = menu(choices, title="What do you do?")
+
+        if choice_idx == 0:
+            depth += 1
+
+        elif choice_idx == 1:
+            if campfire_uses > 0:
+                campfire_uses = _campfire_rest(player, zone, campfire_uses)
+                just_rested = True
+            else:
+                slow_print("\n  You have no campfire supplies left.")
+                pause()
+                just_rested = True
+
+        else:
+            break
 
     slow_print("\n  You make it back to camp safely.")
     pause()
 
 
-def _roll_event(zone):
-    danger_shift = int(zone["danger"] * 20)
+def _show_expedition_status(player, depth, campfire_uses, zone):
+    clear()
+    divider()
+    print(f"  Zone  : {color(zone['name'], 'cyan')}   Depth : {color(str(depth), 'yellow')}")
+    print(f"  HP    : {hp_bar(player.hp, player.max_hp)}")
+    print(f"  MP    : {hp_bar(player.mp, player.max_mp)}")
+    if player.status_effects:
+        effects_str = ", ".join(player.status_effects)
+        print(f"  {color('Status: ' + effects_str, 'red')}")
+    uses_color = "green" if campfire_uses > 0 else "dim"
+    print(f"  {color(f'Campfire uses: {campfire_uses}/2', uses_color)}")
+    divider()
+
+
+def _roll_event(zone, depth):
+    zone_shift = int(zone["danger"] * 20)
     weights = dict(EVENT_WEIGHTS)
-    weights["combat"] += danger_shift
-    weights["rest"]   = max(2, weights["rest"] - danger_shift // 2)
+    weights["combat"]   += zone_shift + depth * 5
+    weights["loot"]     += depth * 3
+    weights["merchant"]  = max(2, weights["merchant"] - max(0, depth - 2) * 3)
+    weights["rest"]      = max(1, weights["rest"] - zone_shift // 2 - depth * 2)
     events = list(weights.keys())
     wts    = list(weights.values())
     return random.choices(events, weights=wts, k=1)[0]
 
 
-def _run_event(player, zone, event):
+def _run_event(player, zone, event, depth, campfire_uses_remaining):
     if event == "combat":
         _combat_event(player, zone)
     elif event == "loot":
@@ -140,15 +299,15 @@ def _run_event(player, zone, event):
     elif event == "book":
         _book_event(player)
     elif event == "rest":
-        _rest_event(player)
+        campfire_uses_remaining = _rest_event(player, zone, campfire_uses_remaining)
+    return campfire_uses_remaining
 
 
 # ── Events ───────────────────────────────────────────────────────────────────
 
-def _combat_event(player, zone):
-    # Boss encounter check (10% when any boss is eligible)
+def _combat_event(player, zone, force_boss=False):
     boss_data = None
-    if random.random() < 0.10:
+    if force_boss:
         boss_data = get_available_boss(player.level, player.killed_bosses)
 
     if boss_data:
@@ -173,7 +332,6 @@ def _combat_event(player, zone):
                 slow_print(f"  You have {player.stat_points} stat point(s) to spend.")
 
         if boss_data:
-            # Boss-specific artifact loot
             first_kill = enemy.name not in player.killed_bosses
             player.killed_bosses.add(enemy.name)
             artifacts = boss_loot_table(enemy.name, first_kill)
@@ -186,7 +344,6 @@ def _combat_event(player, zone):
                     else:
                         slow_print(f"  {msg} Left behind: {item.name}")
 
-        # Always roll normal loot after any combat win (boss or not)
         drops = loot_table(player.level, player.get_loot_bonus())
         for item in drops:
             ok, msg = player.pick_up(item)
@@ -198,12 +355,67 @@ def _combat_event(player, zone):
 
     elif result == "lose":
         slow_print(color("\n  You have been defeated...", "red"))
-        player.hp = 1  # survive with 1 HP (permadeath opt-out)
-        # Lose some gold
+        player.hp = 1
         lost = min(player.gold, random.randint(5, max(5, player.gold // 4)))
         player.gold -= lost
         slow_print(f"  You lost {lost} gold while fleeing for your life.")
         pause()
+
+
+def _campfire_rest(player, zone, campfire_uses_remaining):
+    clear()
+    header("Making Camp")
+    campfire_art = [
+        "      ( )",
+        "   (  ) )",
+        "   ) _  (",
+        "  (_/ \\_ )",
+        "  /|  |\\",
+        " / |  | \\",
+    ]
+    for line in campfire_art:
+        print(f"  {color(line, 'yellow')}")
+    slow_print("\n  You scrape together kindling and coax a small fire to life.")
+    slow_print("  The warmth creeps back into your bones.\n")
+
+    hp_gain = int(player.max_hp * 0.50)
+    mp_gain = int(player.max_mp * 0.50)
+    player.hp = min(player.max_hp, player.hp + hp_gain)
+    player.mp = min(player.max_mp, player.mp + mp_gain)
+    slow_print(f"  Restored {hp_gain} HP and {mp_gain} MP.")
+
+    if player.status_effects:
+        cleared = next(iter(player.status_effects))
+        player.status_effects.discard(cleared)
+        slow_print(f"  The rest helps clear your {cleared} status.")
+
+    if random.random() < 0.25:
+        slow_print(color("\n  The firelight attracts attention! Something approaches!", "red"))
+        pause()
+        _combat_event(player, zone)
+    else:
+        rest_flavour = [
+            "  The fire pops and settles. For a moment, all is quiet.",
+            "  Somewhere distant, water drips. You close your eyes briefly.",
+            "  The flames die down. You feel steadier.",
+            "  No sound but the fire. You take what peace you can.",
+        ]
+        slow_print(random.choice(rest_flavour))
+
+    pause()
+    return campfire_uses_remaining - 1
+
+
+def _rest_event(player, zone, campfire_uses_remaining):
+    """Player stumbles upon an abandoned campfire — free rest, no use consumed."""
+    clear()
+    header("Abandoned Campfire")
+    slow_print("\n  A cold campfire smoulders in a sheltered corner — someone was here recently.")
+    slow_print("  The embers still hold a little warmth. You fan them back to life.")
+    pause()
+    # Pass uses+1 so _campfire_rest's decrement nets to zero change
+    _campfire_rest(player, zone, campfire_uses_remaining + 1)
+    return campfire_uses_remaining
 
 
 def _loot_event(player):
@@ -236,7 +448,6 @@ def _merchant_event(player):
     slow_print("\n  A hooded merchant steps from behind a tree.\n  \"Psst... care to browse my wares?\"")
     pause()
 
-    # Generate a small stock of items
     stock = random.sample(CONSUMABLES, k=min(4, len(CONSUMABLES)))
     if player.level >= 3:
         stock += random.sample(WEAPONS + ARMORS, k=min(3, len(WEAPONS + ARMORS)))
@@ -310,22 +521,4 @@ def _book_event(player):
         slow_print(f"  \"{book.description}\"")
     else:
         slow_print(f"  {msg}")
-    pause()
-
-
-def _rest_event(player):
-    clear()
-    header("A Quiet Moment")
-    descs = [
-        "You find a sheltered alcove and take a short rest.",
-        "A warm campfire still smoulders — someone was here recently.",
-        "You sit by a babbling brook and tend your wounds.",
-        "A hidden grove offers a few minutes of peaceful calm.",
-    ]
-    slow_print(f"\n  {random.choice(descs)}")
-    hp_gain = int(player.max_hp * 0.30)
-    mp_gain = int(player.max_mp * 0.30)
-    player.hp = min(player.max_hp, player.hp + hp_gain)
-    player.mp = min(player.max_mp, player.mp + mp_gain)
-    slow_print(f"  Restored {hp_gain} HP and {mp_gain} MP.")
     pause()
